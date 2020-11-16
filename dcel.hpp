@@ -1,59 +1,44 @@
 #include <bits/stdc++.h>
+#include "Util.hpp"
+#include <vector>
 
 using namespace std;
 
-class vertex
-{
-public:
-    /* data */
-    int key;
-    float x , y;
-};
-
-class half_edge
-{
-public:
-    int origin_v , end_v; 
-    class vertex * origin , * end;
-    class half_edge * twin;
-};
-
-class face
-{
-public:
-    int key = -1;
-};
-
-class vertex_table
-{
-public:
-    class vertex *v;
-    class half_edge *e;
-};
-
-class face_table
-{
-public:
-    class face *face = NULL;
-    vector<half_edge *> inner_components;
-    class half_edge *outer_component = NULL;
-    float area =-1;
-};
-
-class half_edge_table
-{
-public:
-    class half_edge *half_edge , *next , *prev;
-    class face *incident_face = NULL;
-};
-
-#define INF 10000 
-
-struct Point 
-{ 
-	float x; 
-	float y; 
+struct ComparePoint { 
+    bool operator()(pair<Point,int> const& p1, pair<Point,int> const& p2) { 
+        if(p1.first.y > p2.first.y)
+            return true;
+        else if(p1.first.y==p2.first.y)
+            return p1.first.x < p2.first.x; 
+    } 
 }; 
+
+struct Edge{
+    Point p1,p2;
+    int index;
+};
+
+bool IsConvex(Point& p1, Point& p2, Point& p3) {
+	int tmp;
+	tmp = (p3.y-p1.y)*(p2.x-p1.x)-(p3.x-p1.x)*(p2.y-p1.y);
+	if(tmp>0) return 1;
+	return 0;
+}
+
+int VertexType(vector<Point> &vertices, int i){
+    int n=vertices.size();
+    if(vertices[(i-1)%n].y < vertices[i].y && vertices[(i+1)%n].y < vertices[i].y){
+        if(IsConvex(vertices[(i+1)%n], vertices[(i-1)%n], vertices[i]))
+            return 1;   //Start Vertex
+        return -1;      //Split Vertex
+    }
+    else if(vertices[(i-1)%n].y > vertices[i].y && vertices[(i+1)%n].y > vertices[i].y){
+        if(IsConvex(vertices[(i+1)%n], vertices[(i-1)%n], vertices[i]))
+            return 2;   //End Vertex
+        return -2;      //Merge Vertex
+    }
+    return 0;   //Regular Vertex
+} 
 
 // Given three colinear points p, q, r, the function checks if 
 // point q lies on line segment 'pr' 
@@ -144,7 +129,7 @@ bool isInside(Point polygon[], int n, Point p)
 	return count&1; // Same as (count%2 == 1) 
 } 
 
-void print_half_edge(vector<half_edge> &a , vector<vertex> &v , int l)
+void print_half_edge(vector<half_edge> &a , vector<Point> &v , int l)
 {
     for(int i = 0 ; i < l ; i++)
     {
@@ -182,7 +167,7 @@ int search_half_edge_table(half_edge *half_edge , vector<half_edge_table> half_e
     return 0;
 }
 
-void fill_vertex_table(vector<vertex_table> &ver_tab , int l , vector<vector <float> > adj , vector<half_edge> &h , vector<vertex> &v)
+void fill_vertex_table(vector<vertex_table> &ver_tab , int l , vector<vector <float> > adj , vector<half_edge> &h , vector<Point> &v)
 {
     for(int i = 0 ; i < l ; i++)
     {
@@ -204,7 +189,7 @@ float angle(float x1, float y1, float x2, float y2, float x3, float y3)
 }
 
 
-int next_half_edge(int current, vector<vector <float> > adj, vector <vertex> vertex , vector<half_edge> &half_edge)
+int next_half_edge(int current, vector<vector <float> > adj, vector <Point> vertex , vector<half_edge> &half_edge)
 {
     int s , e;
     float max_angle = 0, temp_angle;
@@ -231,7 +216,7 @@ int next_half_edge(int current, vector<vector <float> > adj, vector <vertex> ver
     return search_half_edge(e , next_vertex , half_edge);
 }
 
-float area_poly(vector<int> key , vector<vertex> vertex)
+float area_poly(vector<int> key , vector<Point> vertex)
 {
     float x2 ,y2;
     float signedArea = 0;
@@ -254,7 +239,7 @@ float area_poly(vector<int> key , vector<vertex> vertex)
     return abs(signedArea/2);
 }
 
-void fill_half_edge_face(vector<half_edge_table> &half_edge_table ,vector<face> &face , vector<vertex> vertex , vector<face_table> &face_table)
+void fill_half_edge_face(vector<half_edge_table> &half_edge_table ,vector<face> &face , vector<Point> vertex , vector<face_table> &face_table)
 {
     int l = half_edge_table.size();
     int face_key = 0;
@@ -293,7 +278,7 @@ void fill_half_edge_face(vector<half_edge_table> &half_edge_table ,vector<face> 
 }
 
 void fill_half_edge_table(vector<half_edge_table> &half_edge_table , vector<half_edge> &half_edge , vector<bool> &unvisited_half_edge, 
-vector <vertex> vertex , vector<vector <float> > adj , vector<face> &face , vector<face_table> &face_table)
+vector <Point> vertex , vector<vector <float> > adj , vector<face> &face , vector<face_table> &face_table)
 {
     int l = unvisited_half_edge.size();
     int current, next , previous;
@@ -329,7 +314,7 @@ vector <vertex> vertex , vector<vector <float> > adj , vector<face> &face , vect
     fill_half_edge_face(half_edge_table , face , vertex , face_table);
 }
 
-bool check_if_point_is_inside(int ver , vector<int> key , vector<vertex> &vertex)
+bool check_if_point_is_inside(int ver , vector<int> key , vector<Point> &vertex)
 {
     float x , y;
     int n = key.size(); 
@@ -342,7 +327,7 @@ bool check_if_point_is_inside(int ver , vector<int> key , vector<vertex> &vertex
 	return isInside(polygon1, n, p); 
 }
 
-int check_if_inside(vector<face_table> &face_table,vector<vertex> &vertex  ,vector<int> key , vector<face> face ,
+int check_if_inside(vector<face_table> &face_table,vector<Point> &vertex  ,vector<int> key , vector<face> face ,
  vector<half_edge_table> half_edge_table)
 {
     int face_index = -1;
@@ -400,7 +385,7 @@ int search_outer_face(vector<face> face)
 }
 
 void fill_face_table_inner_components(vector<face_table> &face_table , vector<half_edge> &half_edge 
-, vector<half_edge_table> &half_edge_table , vector<face> &face , vector <vertex> vertex)
+, vector<half_edge_table> &half_edge_table , vector<face> &face , vector <Point> vertex)
 {
     int face_index;
     int l = half_edge_table.size();
@@ -456,7 +441,7 @@ void fill_face_table_inner_components(vector<face_table> &face_table , vector<ha
 
 void print_vertex_table(vector<vertex_table> &ver_tab , int l)
 {
-    vertex * temp_v;
+    Point * temp_v;
     half_edge * temp_e;
     cout << "\n" << "********** Vertex Table ***********"<< "\n";
     cout << "vertex " << " Coordinates " << "Incident Edge " <<"\n";
@@ -536,7 +521,7 @@ int search_face_table(int key, vector<face_table>& face_table)
 }
 
 void print_faces_with_area_lessthan_threshhold(float threshhold_area, vector<face_table> & face_table, vector<class half_edge_table> half_edge_table
-, vector<class vertex> vertex)
+, vector<class Point> vertex)
 {
     class face_table temp = face_table[0];
     int i = 0;
@@ -660,15 +645,8 @@ void print_neighbouring_faces(float x, float y, vector<half_edge> & half_edge_ve
     }
 }
 
-int main()
-{
-    int edges , nodes ;
-    float x , y;
-    cout << "No. of vertices : ";
-    cin >> nodes;
-    cout << "No. of edges : ";
-    cin >> edges;
-    vector<vertex> vertex(nodes);
+void DCEL(int nodes, vector<Point> &vertices, int argc, char** argv){
+    int edges = nodes;
     vector<half_edge> h(2*edges);
     vector<vertex_table> ver_tab(nodes);
     vector<half_edge_table> half_edge_table(2*edges);
@@ -677,39 +655,39 @@ int main()
     vector<face> face(nodes);
     vector<face_table> face_table(nodes);
 
-    for(int i = 0 ; i < nodes ; i++)
-    {
-        cout << "Coordinates of " << i <<" vertex : "; 
-        cin >> x >> y;
-        vertex[i].key = i;
-        vertex[i].x = x; vertex[i].y = y;
-    }
     for(int i = 0 ; i < edges ; i++)
     {
-        cin >> x >> y;
-        adj[x].push_back(y);
-        adj[y].push_back(x);
-        h[2*i].origin_v = x;
-        h[2*i].end_v = y;
-        h[2*i].origin = &vertex[x];
-        h[2*i].end = &vertex[y];
-        h[2*i + 1].origin_v = y;
-        h[2*i + 1].end_v = x;
-        h[2*i + 1].origin = &vertex[y];
-        h[2*i + 1].end = &vertex[x];
+        adj[i].push_back((i+1)%nodes);
+        adj[(i+1)%nodes].push_back(i);
+        h[2*i].origin_v = i;
+        h[2*i].end_v = (i+1)%nodes;
+        h[2*i].origin = &vertices[i];
+        h[2*i].end = &vertices[(i+1)%nodes];
+        h[2*i + 1].origin_v = (i+1)%nodes;
+        h[2*i + 1].end_v = i;
+        h[2*i + 1].origin = &vertices[(i+1)%nodes];
+        h[2*i + 1].end = &vertices[i];
         h[2*i].twin = &h[2*i+1];
         h[2*i + 1].twin = &h[2*i];
     }
-    fill_vertex_table(ver_tab , nodes , adj , h , vertex);
-    fill_half_edge_table(half_edge_table , h , unvisited_half_edge , vertex , adj , face , face_table);
-    fill_face_table_inner_components(face_table, h , half_edge_table , face , vertex);
+    fill_vertex_table(ver_tab , nodes , adj , h , vertices);
+    fill_half_edge_table(half_edge_table , h , unvisited_half_edge , vertices , adj , face , face_table);
+    fill_face_table_inner_components(face_table, h , half_edge_table , face , vertices);
     //print_half_edge(h , vertex , 2*edges);
     print_vertex_table(ver_tab , nodes);
     print_half_edge_table(half_edge_table , h);
     print_face_table(face_table);
 
+    setArguments(half_edge_table, h, vertices);
 
-
+    glutInit(&argc,argv);
+    glutInitDisplayMode (GLUT_SINGLE | GLUT_RGB);
+    glutInitWindowSize (700, 700);
+    glutInitWindowPosition (100, 0);
+    glutCreateWindow ("Initial Polygon");
+    init2D(0.0,0.0,0.0);
+    glutDisplayFunc(display);
+    glutMainLoop();
     
 
 
@@ -721,5 +699,5 @@ int main()
     // cout<<"Enter the name of Half Edge: ";
     // cin >>x>>y;
     // print_neighbouring_faces(x,y,h,half_edge_table,face_table);
-    return 0;
+    // return 0;
 }

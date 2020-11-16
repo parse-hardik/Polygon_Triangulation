@@ -1,3 +1,9 @@
 .vscode
 test.cpp
 test.hpp
+dcel.exe
+dcel.hpp.gch
+Makefile.win
+main.o
+Polygon_Triangulation.exe
+Util.hpp.gch

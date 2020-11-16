@@ -1,44 +1,89 @@
-#include <iostream>
-#include <string>
-#include <vector>
+#include<bits/stdc++.h>
+#include <GL/glut.h> 
+
 using namespace std;
 
-struct Point{
-	int x,y;
+class Point
+{
+public:
+    /* data */
+    int key;
+    float x , y;
 };
 
-struct ComparePoint { 
-    bool operator()(pair<Point,int> const& p1, pair<Point,int> const& p2) { 
-        if(p1.first.y > p2.first.y)
-            return true;
-        else if(p1.first.y==p2.first.y)
-            return p1.first.x < p2.first.x; 
-    } 
-}; 
-
-struct Edge{
-    Point p1,p2;
-    int index;
+class half_edge
+{
+public:
+    int origin_v , end_v; 
+    class Point * origin , * end;
+    class half_edge * twin;
 };
 
-bool IsConvex(Point& p1, Point& p2, Point& p3) {
-	int tmp;
-	tmp = (p3.y-p1.y)*(p2.x-p1.x)-(p3.x-p1.x)*(p2.y-p1.y);
-	if(tmp>0) return 1;
-	return 0;
+class face
+{
+public:
+    int key = -1;
+};
+
+class vertex_table
+{
+public:
+    class Point *v;
+    class half_edge *e;
+};
+
+class face_table
+{
+public:
+    class face *face = NULL;
+    vector<half_edge *> inner_components;
+    class half_edge *outer_component = NULL;
+    float area =-1;
+};
+
+class half_edge_table
+{
+public:
+    class half_edge *half_edge , *next , *prev;
+    class face *incident_face = NULL;
+};
+
+#define INF 10000 
+
+void init2D(float r, float g, float b)
+{
+	glClearColor(r,g,b,0.0);  
+	glMatrixMode (GL_PROJECTION);
+	gluOrtho2D (0.0, 200.0, 0.0, 200.0);
 }
 
-int VertexType(vector<Point> &vertices, int i){
-    int n=vertices.size();
-    if(vertices[(i-1)%n].y < vertices[i].y && vertices[(i+1)%n].y < vertices[i].y){
-        if(IsConvex(vertices[(i+1)%n], vertices[(i-1)%n], vertices[i]))
-            return 1;   //Start Vertex
-        return -1;      //Split Vertex
-    }
-    else if(vertices[(i-1)%n].y > vertices[i].y && vertices[(i+1)%n].y > vertices[i].y){
-        if(IsConvex(vertices[(i+1)%n], vertices[(i-1)%n], vertices[i]))
-            return 2;   //End Vertex
-        return -2;      //Merge Vertex
-    }
-    return 0;   //Regular Vertex
+vector<half_edge_table> het;
+vector<half_edge> he;
+vector<Point> vertices;
+
+void setArguments(vector<half_edge_table> &het1 , vector<half_edge> &h, vector<Point> &vert){
+	het = het1;
+	he = h;
+	vertices = vert;
+}
+
+void display(void){  
+	glClear(GL_COLOR_BUFFER_BIT);
+	glPointSize(3);
+		int l = het.size();
+		class half_edge_table temp;
+		for(int i=0;i<l;i++){
+			temp=het[i];
+			glColor3f(1, 0, 0); 
+			int x0=vertices[temp.half_edge->origin_v].x*5;
+			int y0=vertices[temp.half_edge->origin_v].y*5;
+			int x1=vertices[temp.half_edge->end_v].x*5;
+			int y1=vertices[temp.half_edge->end_v].y*5;
+			glBegin(GL_LINES);
+				glVertex2i(x0,y0);
+				glVertex2i(x1,y1);
+			glEnd();
+		}
+
+	glFlush();	
 }
