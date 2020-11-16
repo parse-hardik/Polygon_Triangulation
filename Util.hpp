@@ -11,7 +11,8 @@ struct ComparePoint {
     bool operator()(pair<Point,int> const& p1, pair<Point,int> const& p2) { 
         if(p1.first.y > p2.first.y)
             return true;
-        return p1.first.x < p2.first.x; 
+        else if(p1.first.y==p2.first.y)
+            return p1.first.x < p2.first.x; 
     } 
 }; 
 

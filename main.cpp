@@ -2,6 +2,7 @@
 #include <vector>
 #include <queue>
 #include <set>
+#include <unordered_map>
 
 #include "Util.hpp"
 
@@ -16,8 +17,12 @@ int main(int argc, char** argv) {
 	for(int i=0;i<n;i++)
 		cin >> vertices[i].x >> vertices[i].y;
 	priority_queue<pair<Point,int>, vector<pair<Point,int>>, ComparePoint> pq;
-	for(int i=0;i<vertices.size();i++)
+	unordered_map<int, vector<int>>m;
+	for(int i=0;i<vertices.size();i++){
 		pq.push(make_pair(vertices[i],i));
+		m[i].push_back(i-1);
+		m[i].push_back(i+1);
+	}
 
 	Edge newEdge;
 	vector<int> helpers(n);
@@ -43,6 +48,8 @@ int main(int argc, char** argv) {
 				edgeTreeIterators[p.second] = edgeTreeRet.first;
 				helpers[newEdge.index]=p.second;
 				break;
+			case 2:
+				// if(VertexType(helpers[]))
 		}
 	}
 }
