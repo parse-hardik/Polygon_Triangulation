@@ -645,8 +645,7 @@ void print_neighbouring_faces(float x, float y, vector<half_edge> & half_edge_ve
     }
 }
 
-void DCEL(int nodes, vector<Point> &vertices, int argc, char** argv){
-    int edges = nodes;
+void DCEL(int nodes, int edges, vector<Point> &vertices, vector<pair<int,int>> &diagonals, int argc, char** argv){
     vector<half_edge> h(2*edges);
     vector<vertex_table> ver_tab(nodes);
     vector<half_edge_table> half_edge_table(2*edges);
@@ -670,6 +669,22 @@ void DCEL(int nodes, vector<Point> &vertices, int argc, char** argv){
         h[2*i].twin = &h[2*i+1];
         h[2*i + 1].twin = &h[2*i];
     }
+    int d = diagonals.size();
+    for(int i = edges ; i<edges+d ; i++){
+        adj[diagonals[i-edges].first].push_back(diagonals[i-edges].second);
+        adj[diagonals[i-edges].second].push_back(diagonals[i-edges].first);
+        h[2*i].origin_v = diagonals[i-edges].first;
+        h[2*i].end_v = diagonals[i-edges].second;
+        h[2*i].origin = &vertices[diagonals[i-edges].first];
+        h[2*i].end = &vertices[diagonals[i-edges].second];
+        h[2*i + 1].origin_v = diagonals[i-edges].second;
+        h[2*i + 1].end_v = diagonals[i-edges].first;
+        h[2*i + 1].origin = &vertices[diagonals[i-edges].second];
+        h[2*i + 1].end = &vertices[diagonals[i-edges].first];
+        h[2*i].twin = &h[2*i+1];
+        h[2*i + 1].twin = &h[2*i];
+    }
+
     fill_vertex_table(ver_tab , nodes , adj , h , vertices);
     fill_half_edge_table(half_edge_table , h , unvisited_half_edge , vertices , adj , face , face_table);
     fill_face_table_inner_components(face_table, h , half_edge_table , face , vertices);
@@ -678,7 +693,7 @@ void DCEL(int nodes, vector<Point> &vertices, int argc, char** argv){
     print_half_edge_table(half_edge_table , h);
     print_face_table(face_table);
 
-    setArguments(half_edge_table, h, vertices);
+    setArguments(half_edge_table, h, vertices, ver_tab);
 
     glutInit(&argc,argv);
     glutInitDisplayMode (GLUT_SINGLE | GLUT_RGB);

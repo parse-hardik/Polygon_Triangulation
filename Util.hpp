@@ -60,11 +60,13 @@ void init2D(float r, float g, float b)
 vector<half_edge_table> het;
 vector<half_edge> he;
 vector<Point> vertices;
+vector<vertex_table> vt;
 
-void setArguments(vector<half_edge_table> &het1 , vector<half_edge> &h, vector<Point> &vert){
+void setArguments(vector<half_edge_table> &het1 , vector<half_edge> &h, vector<Point> &vert, vector<vertex_table> &vertab){
 	het = het1;
 	he = h;
 	vertices = vert;
+	vt = vertab;
 }
 
 void display(void){  
