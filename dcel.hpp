@@ -699,6 +699,7 @@ void DCEL(int nodes, int edges, vector<Point> &vertices, vector<pair<int,int>> &
     vector<face> face(nodes);
     vector<face_table> face_table(nodes);
 
+
     for(int i = 0 ; i < edges ; i++)
     {
         adj[i].push_back((i+1)%nodes);
@@ -714,8 +715,9 @@ void DCEL(int nodes, int edges, vector<Point> &vertices, vector<pair<int,int>> &
         h[2*i].twin = &h[2*i+1];
         h[2*i + 1].twin = &h[2*i];
     }
+    cout << "In dcel" << endl;
     int d = diagonals.size();
-    for(int i = edges ; i<edges+d ; i++){
+    /*for(int i = edges ; i<edges+d ; i++){
         adj[diagonals[i-edges].first].push_back(diagonals[i-edges].second);
         adj[diagonals[i-edges].second].push_back(diagonals[i-edges].first);
         h[2*i].origin_v = diagonals[i-edges].first;
@@ -728,7 +730,7 @@ void DCEL(int nodes, int edges, vector<Point> &vertices, vector<pair<int,int>> &
         h[2*i + 1].end = &vertices[diagonals[i-edges].first];
         h[2*i].twin = &h[2*i+1];
         h[2*i + 1].twin = &h[2*i];
-    }
+    }*/
 
     fill_vertex_table(ver_tab , nodes , adj , h , vertices);
     fill_half_edge_table(half_edge_table , h , unvisited_half_edge , vertices , adj , face , face_table);

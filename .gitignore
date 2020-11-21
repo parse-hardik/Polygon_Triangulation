@@ -1,6 +1,4 @@
 .vscode
-test.cpp
-test.hpp
 dcel.exe
 dcel.hpp.gch
 Makefile.win
