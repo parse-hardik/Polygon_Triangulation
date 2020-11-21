@@ -33,7 +33,7 @@ int main(int argc, char** argv) {
 		Half-Edge Table
 		Face Table
 	*/
-	// DCEL(n, n, vertices, diagonals, argc, argv);
+	DCEL(n, n, vertices, diagonals, argc, argv);
 	
 	cout << "Proceed to decomposing the polygon into y-MonoTone pieces?" << endl;
 	cout << "Y for yes, else N" << endl;
