@@ -4,36 +4,81 @@
 
 using namespace std;
 
-struct ComparePoint { 
+class ComparePoint { 
+	public:
     bool operator()(pair<Point,int> const& p1, pair<Point,int> const& p2) { 
-        if(p1.first.y > p2.first.y)
-            return true;
-        else if(p1.first.y==p2.first.y)
-            return p1.first.x < p2.first.x; 
+        // if(p1.first.y > p2.first.y)
+        //     return true;
+        // else if(p1.first.y==p2.first.y)
+        //     return p1.first.x < p2.first.x; 
+        return (p1.first.y < p2.first.y) || (p1.first.y==p2.first.y && p1.first.x>p2.first.x);
     } 
 }; 
 
-struct Edge{
-    Point p1,p2;
-    int index;
+bool IsConvex(const Point& p1, const Point& p2, const Point& p3) {
+    int tmp = (p3.y-p2.y)*(p2.x-p1.x) - (p2.y-p1.y)*(p3.x-p2.x);
+    // cout << "InConvex" << endl;
+    // cout << p1.x << " " << p1.y<< endl;
+    // cout << p2.x << " " << p2.y<< endl;
+    // cout << p3.x << " " << p3.y<< endl;
+    // cout << "tmp is " << tmp << endl;
+    // cout << "OutConvex" << endl;
+	if(tmp>0) return 1; 	//counter-clockwise
+	return 0;               //clockwise
+}
+
+struct EdgeCompare
+{
+    bool operator() (const Edge& e1, const Edge& other) const{
+        if(other.p1.y == other.p2.y) {
+            if(e1.p1.y == e1.p2.y) {
+                if(e1.p1.y < other.p1.y) return true;
+                else return false;
+            }
+            if(IsConvex(e1.p1,e1.p2,other.p1)) return true;
+            else return false;
+        } else if(e1.p1.y == e1.p2.y) {
+            if(IsConvex(other.p1,other.p2,e1.p1)) return false;
+            else return true;	
+        } else if(e1.p1.y < other.p1.y) {
+            if(IsConvex(other.p1,other.p2,e1.p1)) return false;
+            else return true;			
+        } else {
+            if(IsConvex(e1.p1,e1.p2,other.p1)) return true;
+            else return false;
+        }
+    }
 };
 
-bool IsConvex(Point& p1, Point& p2, Point& p3) {
-	int tmp;
-	tmp = (p3.y-p1.y)*(p2.x-p1.x)-(p3.x-p1.x)*(p2.y-p1.y);
-	if(tmp>0) return 1;
-	return 0;
+bool Edge::operator < (const Edge & other) const {
+    if(other.p1.y == other.p2.y) {
+		if(p1.y == p2.y) {
+			if(p1.y < other.p1.y) return true;
+			else return false;
+		}
+		if(IsConvex(p1,p2,other.p1)) return true;
+		else return false;
+	} else if(p1.y == p2.y) {
+		if(IsConvex(other.p1,other.p2,p1)) return false;
+		else return true;	
+	} else if(p1.y < other.p1.y) {
+		if(IsConvex(other.p1,other.p2,p1)) return false;
+		else return true;			
+	} else {
+		if(IsConvex(p1,p2,other.p1)) return true;
+		else return false;
+	}
 }
 
 int VertexType(vector<Point> &vertices, int i){
     int n=vertices.size();
-    if(vertices[(i-1)%n].y < vertices[i].y && vertices[(i+1)%n].y < vertices[i].y){
-        if(IsConvex(vertices[(i+1)%n], vertices[(i-1)%n], vertices[i]))
+    if(vertices[(i+n-1)%n].y < vertices[i].y && vertices[(i+1)%n].y < vertices[i].y){
+        if(IsConvex(vertices[(i+1)%n], vertices[(i+n-1)%n], vertices[i]))
             return 1;   //Start Vertex
         return -1;      //Split Vertex
     }
-    else if(vertices[(i-1)%n].y > vertices[i].y && vertices[(i+1)%n].y > vertices[i].y){
-        if(IsConvex(vertices[(i+1)%n], vertices[(i-1)%n], vertices[i]))
+    else if(vertices[(i+n-1)%n].y > vertices[i].y && vertices[(i+1)%n].y > vertices[i].y){
+        if(IsConvex(vertices[(i+1)%n], vertices[(i+n-1)%n], vertices[i]))
             return 2;   //End Vertex
         return -2;      //Merge Vertex
     }
@@ -645,8 +690,7 @@ void print_neighbouring_faces(float x, float y, vector<half_edge> & half_edge_ve
     }
 }
 
-void DCEL(int nodes, vector<Point> &vertices, int argc, char** argv){
-    int edges = nodes;
+void DCEL(int nodes, int edges, vector<Point> &vertices, vector<pair<int,int>> &diagonals, int argc, char** argv){
     vector<half_edge> h(2*edges);
     vector<vertex_table> ver_tab(nodes);
     vector<half_edge_table> half_edge_table(2*edges);
@@ -670,6 +714,22 @@ void DCEL(int nodes, vector<Point> &vertices, int argc, char** argv){
         h[2*i].twin = &h[2*i+1];
         h[2*i + 1].twin = &h[2*i];
     }
+    int d = diagonals.size();
+    for(int i = edges ; i<edges+d ; i++){
+        adj[diagonals[i-edges].first].push_back(diagonals[i-edges].second);
+        adj[diagonals[i-edges].second].push_back(diagonals[i-edges].first);
+        h[2*i].origin_v = diagonals[i-edges].first;
+        h[2*i].end_v = diagonals[i-edges].second;
+        h[2*i].origin = &vertices[diagonals[i-edges].first];
+        h[2*i].end = &vertices[diagonals[i-edges].second];
+        h[2*i + 1].origin_v = diagonals[i-edges].second;
+        h[2*i + 1].end_v = diagonals[i-edges].first;
+        h[2*i + 1].origin = &vertices[diagonals[i-edges].second];
+        h[2*i + 1].end = &vertices[diagonals[i-edges].first];
+        h[2*i].twin = &h[2*i+1];
+        h[2*i + 1].twin = &h[2*i];
+    }
+
     fill_vertex_table(ver_tab , nodes , adj , h , vertices);
     fill_half_edge_table(half_edge_table , h , unvisited_half_edge , vertices , adj , face , face_table);
     fill_face_table_inner_components(face_table, h , half_edge_table , face , vertices);
@@ -678,7 +738,7 @@ void DCEL(int nodes, vector<Point> &vertices, int argc, char** argv){
     print_half_edge_table(half_edge_table , h);
     print_face_table(face_table);
 
-    setArguments(half_edge_table, h, vertices);
+    setArguments(half_edge_table, h, vertices, ver_tab);
 
     glutInit(&argc,argv);
     glutInitDisplayMode (GLUT_SINGLE | GLUT_RGB);

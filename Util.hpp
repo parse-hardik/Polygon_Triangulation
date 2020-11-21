@@ -11,6 +11,13 @@ public:
     float x , y;
 };
 
+class Edge{
+	public:
+		Point p1,p2;
+		int index;
+		bool operator<(const Edge & other) const;
+};
+
 class half_edge
 {
 public:
@@ -60,11 +67,13 @@ void init2D(float r, float g, float b)
 vector<half_edge_table> het;
 vector<half_edge> he;
 vector<Point> vertices;
+vector<vertex_table> vt;
 
-void setArguments(vector<half_edge_table> &het1 , vector<half_edge> &h, vector<Point> &vert){
+void setArguments(vector<half_edge_table> &het1 , vector<half_edge> &h, vector<Point> &vert, vector<vertex_table> &vertab){
 	het = het1;
 	he = h;
 	vertices = vert;
+	vt = vertab;
 }
 
 void display(void){  
