@@ -2,13 +2,13 @@
 #include <vector>
 #include <queue>
 #include <set>
-#include <unordered_map>
+#include <map>
 
 #include "dcel.hpp"
 
 using namespace std;
 
-int findIter(set<pair<int,int>>::iterator &it, vector<set<pair<int,int>>::iterator> &helper){
+int findIter(set<Edge>::iterator &it, vector<set<Edge>::iterator> &helper){
 	for(int i=0;i<helper.size();i++){
 		if(helper[i]==it)
 			return i;
@@ -47,11 +47,9 @@ int main(int argc, char** argv) {
 		pq.push(make_pair(vertices[i],i));
 	}
 
-	set<pair<int,int>> Status;
-	vector<set<pair<int,int>>::iterator> helper;
-	auto iter = Status.begin();
-	auto i = Status.begin();
-	unordered_map<int, int> helperIndex;
+	set<Edge> Status;
+	// vector<set<Edge>::iterator> helper;
+	map<Edge, int, EdgeCompare> helper;
 
 	while(!pq.empty()){
 		pair<Point,int> p=pq.top();
@@ -62,30 +60,39 @@ int main(int argc, char** argv) {
 		cout << ex << " ";
 		cout << ey << endl;
 		cout << "Type is  " << type << endl;
-		cout << "Status before is " ;
-		for(auto x:Status)
-			cout << x.first << " " << x.second << endl;
+		cout << "Status before is " << endl;
+		for(auto it=Status.begin();it!=Status.end();it++){
+			Edge newEdge;
+			newEdge.p1 = it->p1;
+			newEdge.p2 = it->p2;
+			int index = helper[newEdge];
+			cout << "(" << it->p1.x << "," << it->p1.y  << ") " << "(" << it->p2.x << "," << it->p2.y << ") -> " << index<< endl;
+		}
 		switch(type){
 			//Insert ei in T and set helper(ei) to vi.
 			case 1:{ 					// Start Vertex
-				iter = Status.insert(make_pair(p.second, (p.second+1)%n)).first; 
-				helper.push_back(iter);
-				helperIndex[helper.size()-1]=p.second;
+				Edge newEdge;
+				newEdge.p1 = p.first;
+				newEdge.p2 = vertices[(p.second+1)%n];
+				auto iter = Status.insert(newEdge).first; 
+				helper[newEdge]=p.second;
 				break;
 				}
 			case 2:	{					// End
-				pair<int,int> temp = make_pair((p.second+n-1)%n, p.second);
-				i = Status.find(temp);
-				int index = helperIndex[findIter(i,helper)];
+				Edge newEdge;
+				newEdge.p1 =vertices[(p.second+n-1)%n];
+				newEdge.p2 = p.first;
+				int index = helper[newEdge];
 				if(VertexType(vertices, index)==-2)
 					diagonals.push_back(make_pair(index,p.second));
-				Status.erase(temp);
+				Status.erase(newEdge);
 				break;
 				}
 			case -1:	{				//Split
-				pair<int,int> temp = make_pair(p.second,p.second);
-				i = Status.lower_bound(temp);
-				cout << "In Split " << endl;
+				Edge newEdge;
+				newEdge.p1 =p.first;
+				newEdge.p2 = p.first;
+				auto i = Status.lower_bound(newEdge);
 				if(i!=Status.begin())
 					i--;
 				else{
@@ -93,63 +100,94 @@ int main(int argc, char** argv) {
 					err=true;
 					break;
 				}
-				int index = helperIndex[findIter(i,helper)];
+//				cout << "In Split \n" << i->first.p1.x << "," << i->first.p1.y << " to ";
+//				cout << i->first.p2.x << "," << i->first.p2.y << endl;
+				newEdge.p1 = i->p1;
+				newEdge.p2 = i->p2;
+				int index = helper[newEdge];
+				// cout << "Diagonal is " << index << "to " << p.second << endl;
 				diagonals.push_back(make_pair(index,p.second));
-				helper.push_back(i);
-				helperIndex[helper.size()-1]=p.second;
-				iter = Status.insert(make_pair(p.second, (p.second+1)%n)).first;
-				helper.push_back(iter);
-				helperIndex[helper.size()-1]=p.second;
+				helper[newEdge] = p.second;
+				newEdge.p1 = p.first;
+				newEdge.p2 = vertices[(p.second+1)%n];
+				auto iter = Status.insert(newEdge).first;
+				helper[newEdge] = p.second;
 				break;
 				}
 			case -2:{					//Merge
-				pair<int,int> temp = make_pair((p.second+n-1)%n, p.second);
-				i = Status.find(temp);
-				int index = helperIndex[findIter(i,helper)];
+				Edge newEdge;
+				newEdge.p1 = vertices[(p.second+n-1)%n];
+				newEdge.p2 = p.first;
+				auto iter = Status.find(newEdge);
+				int index = helper[newEdge];
 				if(VertexType(vertices,index)==-2)
 					diagonals.push_back(make_pair(index,p.second));
-				Status.erase(i);
+				Status.erase(iter);
 				//Find the edge directly to the left of merge vertex and insert diagonal if helper is also merge
-				temp = make_pair(p.second,p.second);
-				i = Status.lower_bound(temp);
-				i--;
-				index = helperIndex[findIter(i,helper)];
+				newEdge.p1 = p.first;
+				newEdge.p2 = p.first;
+				auto i = Status.lower_bound(newEdge);
+				if(i!=Status.begin())
+					i--;
+				else{
+					cout << "Error" << endl;
+					err=true;
+					break;
+				}
+				newEdge.p1 = i->p1;
+				newEdge.p2 = i->p2;
+				index = helper[newEdge];
 				if(VertexType(vertices,index)==-2)
 					diagonals.push_back(make_pair(index,p.second));
-				helper.push_back(iter);
-				helperIndex[helper.size()-1]=p.second;
+				helper[newEdge] = p.second;
 				break;
 				}
 			case 0:{
 				if(vertices[p.second].y<vertices[(p.second+n-1)%n].y){
-					pair<int,int> temp = make_pair((p.second+n-1)%n, p.second);
-					i = Status.find(temp);
-					int index = helperIndex[findIter(i,helper)];
+					Edge newEdge;
+					newEdge.p1 = vertices[(p.second+n-1)%n];
+					newEdge.p2 = p.first;
+					auto i = Status.find(newEdge);
+					int index = helper[newEdge];
 					if(VertexType(vertices,index)==-2)
 						diagonals.push_back(make_pair(index,p.second));
 					Status.erase(i);
 					//Insert the next edge in Status Data Structure and set helper of ei to vi
-					temp = make_pair(p.second,(p.second+1)%n);
-					iter = Status.insert(temp).first;
-					helper.push_back(iter);
-					helperIndex[helper.size()-1]=p.second;
+					newEdge.p2 = vertices[(p.second+1)%n];
+					newEdge.p1 = p.first;
+					Status.insert(newEdge).first;
+					helper[newEdge] = p.second;
 				}
 				else{
-					pair<int,int> temp = make_pair(p.second, p.second);
-					i = Status.lower_bound(temp);
-					i--;
-					int index = helperIndex[findIter(i,helper)];
+					Edge newEdge;
+					newEdge.p1 = p.first;
+					newEdge.p2 = p.first;
+					auto i = Status.lower_bound(newEdge);
+					if(i!=Status.begin())
+						i--;
+					else{
+						cout << "Error" << endl;
+						err=true;
+						break;
+					}
+					newEdge.p1 = i->p1;
+					newEdge.p2 = i->p2;
+					int index = helper[newEdge];
 					if(VertexType(vertices,index)==-2)
 						diagonals.push_back(make_pair(index,p.second));
-					helper.push_back(iter);
-					helperIndex[helper.size()-1]=p.second;
+					helper[newEdge] = p.second;
 				}
 				break;
 				}
 		}
-		cout << "Status after is " ;
-		for(auto x:Status)
-			cout << x.first << " " << x.second << endl;
+		cout << "Status after is " << endl;
+		for(auto it=Status.begin();it!=Status.end();it++){
+			Edge newEdge;
+			newEdge.p1 = it->p1;
+			newEdge.p2 = it->p2;
+			int index = helper[newEdge];
+			cout << "(" << it->p1.x << "," << it->p1.y  << ") " << "(" << it->p2.x << "," << it->p2.y << ") -> " << index<< endl;
+		}
 		if(err){
 			cout << "In error" << endl;
 			break;
@@ -159,7 +197,7 @@ int main(int argc, char** argv) {
 	for(int i=0;i<diagonals.size();i++){
 		cout << diagonals[i].first << " " << diagonals[i].second << endl;
 	}
-	DCEL(n, n+diagonals.size(), vertices, diagonals, argc, argv);
+	// DCEL(n, n+diagonals.size(), vertices, diagonals, argc, argv);
 }
 
 /*
@@ -169,4 +207,14 @@ int main(int argc, char** argv) {
 15 15
 20 13
 20 25
+*/
+
+
+/*
+15 20
+10 25
+10 10
+20 15
+35 13
+30 30
 */

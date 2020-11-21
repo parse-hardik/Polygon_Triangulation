@@ -15,12 +15,7 @@ class ComparePoint {
     } 
 }; 
 
-struct Edge{
-    Point p1,p2;
-    int index;
-};
-
-bool IsConvex(Point& p1, Point& p2, Point& p3) {
+bool IsConvex(const Point& p1, const Point& p2, const Point& p3) {
     int tmp = (p3.y-p2.y)*(p2.x-p1.x) - (p2.y-p1.y)*(p3.x-p2.x);
     // cout << "InConvex" << endl;
     // cout << p1.x << " " << p1.y<< endl;
@@ -32,14 +27,57 @@ bool IsConvex(Point& p1, Point& p2, Point& p3) {
 	return 0;               //clockwise
 }
 
+struct EdgeCompare
+{
+    bool operator() (const Edge& e1, const Edge& other) const{
+        if(other.p1.y == other.p2.y) {
+            if(e1.p1.y == e1.p2.y) {
+                if(e1.p1.y < other.p1.y) return true;
+                else return false;
+            }
+            if(IsConvex(e1.p1,e1.p2,other.p1)) return true;
+            else return false;
+        } else if(e1.p1.y == e1.p2.y) {
+            if(IsConvex(other.p1,other.p2,e1.p1)) return false;
+            else return true;	
+        } else if(e1.p1.y < other.p1.y) {
+            if(IsConvex(other.p1,other.p2,e1.p1)) return false;
+            else return true;			
+        } else {
+            if(IsConvex(e1.p1,e1.p2,other.p1)) return true;
+            else return false;
+        }
+    }
+};
+
+bool Edge::operator < (const Edge & other) const {
+    if(other.p1.y == other.p2.y) {
+		if(p1.y == p2.y) {
+			if(p1.y < other.p1.y) return true;
+			else return false;
+		}
+		if(IsConvex(p1,p2,other.p1)) return true;
+		else return false;
+	} else if(p1.y == p2.y) {
+		if(IsConvex(other.p1,other.p2,p1)) return false;
+		else return true;	
+	} else if(p1.y < other.p1.y) {
+		if(IsConvex(other.p1,other.p2,p1)) return false;
+		else return true;			
+	} else {
+		if(IsConvex(p1,p2,other.p1)) return true;
+		else return false;
+	}
+}
+
 int VertexType(vector<Point> &vertices, int i){
     int n=vertices.size();
-    if(vertices[(i-1)%n].y < vertices[i].y && vertices[(i+1)%n].y < vertices[i].y){
+    if(vertices[(i+n-1)%n].y < vertices[i].y && vertices[(i+1)%n].y < vertices[i].y){
         if(IsConvex(vertices[(i+1)%n], vertices[(i+n-1)%n], vertices[i]))
             return 1;   //Start Vertex
         return -1;      //Split Vertex
     }
-    else if(vertices[(i-1)%n].y > vertices[i].y && vertices[(i+1)%n].y > vertices[i].y){
+    else if(vertices[(i+n-1)%n].y > vertices[i].y && vertices[(i+1)%n].y > vertices[i].y){
         if(IsConvex(vertices[(i+1)%n], vertices[(i+n-1)%n], vertices[i]))
             return 2;   //End Vertex
         return -2;      //Merge Vertex

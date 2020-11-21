@@ -11,6 +11,13 @@ public:
     float x , y;
 };
 
+class Edge{
+	public:
+		Point p1,p2;
+		int index;
+		bool operator<(const Edge & other) const;
+};
+
 class half_edge
 {
 public:
