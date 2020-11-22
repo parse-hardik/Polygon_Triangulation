@@ -3,5 +3,6 @@ dcel.exe
 dcel.hpp.gch
 Makefile.win
 main.o
+main.exe
 Polygon_Triangulation.exe
 Util.hpp.gch

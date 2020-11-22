@@ -90,10 +90,10 @@ void display(void){
 		for(int i=0;i<l;i++){
 			temp=het[i];
 			glColor3f(1, 0, 0); 
-			int x0=vertices[temp.half_edge->origin_v].x*10;
-			int y0=vertices[temp.half_edge->origin_v].y*10;
-			int x1=vertices[temp.half_edge->end_v].x*10;
-			int y1=vertices[temp.half_edge->end_v].y*10;
+			int x0=vertices[temp.half_edge->origin_v].x*5;
+			int y0=vertices[temp.half_edge->origin_v].y*5;
+			int x1=vertices[temp.half_edge->end_v].x*5;
+			int y1=vertices[temp.half_edge->end_v].y*5;
 			glBegin(GL_LINES);
 				glVertex2i(x0,y0);
 				glVertex2i(x1,y1);
@@ -101,10 +101,10 @@ void display(void){
 		}
 		for(auto diagonal:diagonals){
 			glColor3f(0, 0, 1); 
-			int x0=vertices[diagonal.first].x*10;
-			int y0=vertices[diagonal.first].y*10;
-			int x1=vertices[diagonal.second].x*10;
-			int y1=vertices[diagonal.second].y*10;
+			int x0=vertices[diagonal.first].x*5;
+			int y0=vertices[diagonal.first].y*5;
+			int x1=vertices[diagonal.second].x*5;
+			int y1=vertices[diagonal.second].y*5;
 			glBegin(GL_LINES);
 				glVertex2i(x0,y0);
 				glVertex2i(x1,y1);
