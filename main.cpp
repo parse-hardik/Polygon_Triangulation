@@ -8,7 +8,7 @@
 
 using namespace std;
 
-vector<pair<int,int>> diagonals;
+
 
 
 
@@ -328,23 +328,26 @@ int main(int argc, char** argv) {
 		cout << diagonals[i].first << " " << diagonals[i].second << endl;
 	}
 
-	DCEL(n, n, vertices, diagonals, argc, argv, false);
+	DCEL(n, n, vertices, diagonals);
+	
+
 	
 	for(auto polygon: POLYGONS)
 	{
 		cout<<"triangulating a polygon\n";
 		triangulatePolygon(polygon);
 	}
-	DCEL(n, n, vertices, diagonals, argc, argv,true);
+	//DCEL(n, n, vertices, diagonals);
 
-	// glutInit(&argc,argv);
-    // glutInitDisplayMode (GLUT_SINGLE | GLUT_RGB);
-    // glutInitWindowSize (700, 700);
-    // glutInitWindowPosition (100, 0);
-    // glutCreateWindow ("Initial Polygon");
-    // init2D(0.0,0.0,0.0);
-    // glutDisplayFunc(display);
-    // glutMainLoop();
+
+	glutInit(&argc,argv);
+    glutInitDisplayMode (GLUT_SINGLE | GLUT_RGB);
+    glutInitWindowSize (700, 700);
+    glutInitWindowPosition (100, 0);
+    glutCreateWindow ("Initial Polygon");
+    init2D(0.0,0.0,0.0);
+    glutDisplayFunc(display);
+    glutMainLoop();
 }
 
 /*

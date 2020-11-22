@@ -690,7 +690,7 @@ void print_neighbouring_faces(float x, float y, vector<half_edge> & half_edge_ve
     }
 }
 
-void DCEL(int nodes, int edges, vector<Point> &vertices, vector<pair<int,int>> &diagonals, int argc, char** argv, bool show){
+void DCEL(int nodes, int edges, vector<Point> &vertices, vector<pair<int,int>> &diagonals){
     int d = diagonals.size();
     vector<half_edge> h(2*edges + 2*d);
     vector<vertex_table> ver_tab(nodes);
@@ -727,6 +727,7 @@ void DCEL(int nodes, int edges, vector<Point> &vertices, vector<pair<int,int>> &
     }
 
 
+
     fill_vertex_table(ver_tab , nodes , adj , h , vertices);
     fill_half_edge_table(half_edge_table , h , unvisited_half_edge , vertices , adj , face , face_table);
     fill_face_table_inner_components(face_table, h , half_edge_table , face , vertices);
@@ -734,6 +735,7 @@ void DCEL(int nodes, int edges, vector<Point> &vertices, vector<pair<int,int>> &
     print_vertex_table(ver_tab , nodes);
     print_half_edge_table(half_edge_table , h);
     print_face_table(face_table);
+
 
     
 
@@ -746,9 +748,11 @@ void DCEL(int nodes, int edges, vector<Point> &vertices, vector<pair<int,int>> &
             continue;
         polygon.push_back(*(temp.outer_component->origin));
         int indexOfBeginEgde = search_half_edge_table(temp.outer_component, half_edge_table);
+		cout<<indexOfBeginEgde<<" this si the eindex\n";
         while(half_edge_table[indexOfBeginEgde].next!=temp.outer_component)
         {
             polygon.push_back(*(half_edge_table[indexOfBeginEgde].next->origin));
+			//cout<<" pushing  these are the points"<<half_edge_table[indexOfBeginEgde].next->origin_v<<" "<<half_edge_table[indexOfBeginEgde].next->end_v<<"\n";
             indexOfBeginEgde++;
         }
         POLYGONS.push_back(polygon);
@@ -761,8 +765,9 @@ void DCEL(int nodes, int edges, vector<Point> &vertices, vector<pair<int,int>> &
             cout<<p.key<<" "<<p.x<<" "<<p.y<<" \n";
         }
     }
+    
 
-    setArguments(half_edge_table, h, vertices, ver_tab);
+    setArguments(half_edge_table, h, vertices, ver_tab, face_table);
 
    
     return;

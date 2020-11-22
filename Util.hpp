@@ -69,12 +69,15 @@ vector<half_edge_table> het;
 vector<half_edge> he;
 vector<Point> vertices;
 vector<vertex_table> vt;
+vector<face_table> ft;
+vector<pair<int,int> > diagonals;
 
-void setArguments(vector<half_edge_table> &het1 , vector<half_edge> &h, vector<Point> &vert, vector<vertex_table> &vertab){
+void setArguments(vector<half_edge_table> &het1 , vector<half_edge> &h, vector<Point> &vert, vector<vertex_table> &vertab, vector<face_table> &ftab){
 	het = het1;
 	he = h;
 	vertices = vert;
 	vt = vertab;
+	ft=ftab;
 }
 
 void display(void){  
@@ -89,6 +92,18 @@ void display(void){
 			int y0=vertices[temp.half_edge->origin_v].y*5;
 			int x1=vertices[temp.half_edge->end_v].x*5;
 			int y1=vertices[temp.half_edge->end_v].y*5;
+			glBegin(GL_LINES);
+				glVertex2i(x0,y0);
+				glVertex2i(x1,y1);
+			glEnd();
+		}
+		for(auto diagonal: diagonals)
+		{
+			glColor3f(1, 0, 0); 
+			int x0=vertices[diagonal.first].x*5;
+			int y0=vertices[diagonal.first].y*5;
+			int x1=vertices[diagonal.second].x*5;
+			int y1=vertices[diagonal.second].y*5;
 			glBegin(GL_LINES);
 				glVertex2i(x0,y0);
 				glVertex2i(x1,y1);
