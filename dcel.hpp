@@ -3,7 +3,7 @@
 #include <vector>
 
 using namespace std;
-
+vector<vector<Point>> POLYGONS;
 class ComparePoint { 
 	public:
     bool operator()(pair<Point,int> const& p1, pair<Point,int> const& p2) { 
@@ -690,7 +690,7 @@ void print_neighbouring_faces(float x, float y, vector<half_edge> & half_edge_ve
     }
 }
 
-void DCEL(int nodes, int edges, vector<Point> &vertices, vector<pair<int,int>> &diagonals, int argc, char** argv){
+void DCEL(int nodes, int edges, vector<Point> &vertices, vector<pair<int,int>> &diagonals, int argc, char** argv, bool show){
     int d = diagonals.size();
     vector<half_edge> h(2*edges + 2*d);
     vector<vertex_table> ver_tab(nodes);
@@ -735,16 +735,35 @@ void DCEL(int nodes, int edges, vector<Point> &vertices, vector<pair<int,int>> &
     print_half_edge_table(half_edge_table , h);
     print_face_table(face_table);
 
+    
+
+    // isolate polygons 
+    for(int i=0;i<face_table.size();i++)
+    {
+        vector<Point> polygon;
+        class face_table temp=face_table[i];
+        if(temp.outer_component==NULL)
+            continue;
+        polygon.push_back(*(temp.outer_component->origin));
+        int indexOfBeginEgde = search_half_edge_table(temp.outer_component, half_edge_table);
+        while(half_edge_table[indexOfBeginEgde].next!=temp.outer_component)
+        {
+            polygon.push_back(*(half_edge_table[indexOfBeginEgde].next->origin));
+            indexOfBeginEgde++;
+        }
+        POLYGONS.push_back(polygon);
+    }
+    for(auto polygon: POLYGONS)
+    {
+        cout<<"new polygon \n";
+        for(auto p : polygon )
+        {
+            cout<<p.key<<" "<<p.x<<" "<<p.y<<" \n";
+        }
+    }
 
     setArguments(half_edge_table, h, vertices, ver_tab);
 
-    glutInit(&argc,argv);
-    glutInitDisplayMode (GLUT_SINGLE | GLUT_RGB);
-    glutInitWindowSize (700, 700);
-    glutInitWindowPosition (100, 0);
-    glutCreateWindow ("Initial Polygon");
-    init2D(0.0,0.0,0.0);
-    glutDisplayFunc(display);
-    glutMainLoop();
+   
     return;
 }

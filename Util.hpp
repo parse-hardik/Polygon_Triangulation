@@ -24,6 +24,7 @@ public:
     int origin_v , end_v; 
     class Point * origin , * end;
     class half_edge * twin;
+	//class half_edge *
 };
 
 class face
