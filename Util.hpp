@@ -72,7 +72,8 @@ vector<vertex_table> vt;
 vector<face_table> ft;
 vector<pair<int,int> > diagonals;
 
-void setArguments(vector<half_edge_table> &het1 , vector<half_edge> &h, vector<Point> &vert, vector<vertex_table> &vertab, vector<face_table> &ftab){
+void setArguments(vector<half_edge_table> &het1 , vector<half_edge> &h, 
+vector<Point> &vert, vector<vertex_table> &vertab, vector<face_table> &ftab){
 	het = het1;
 	he = h;
 	vertices = vert;
@@ -81,17 +82,22 @@ void setArguments(vector<half_edge_table> &het1 , vector<half_edge> &h, vector<P
 }
 
 void display(void){  
+	cout<<"in displplay\n";
 	glClear(GL_COLOR_BUFFER_BIT);
 	glPointSize(3);
 		int l = het.size();
+		cout<<l<<" this is l\n";
 		class half_edge_table temp;
 		for(int i=0;i<l;i++){
+			cout<<"in loop  "<<i<<" \n";
 			temp=het[i];
+			//cout<<vertices[temp.half_edge->origin].x*5<<" is vertex\n";
 			glColor3f(1, 0, 0); 
-			int x0=vertices[temp.half_edge->origin_v].x*5;
-			int y0=vertices[temp.half_edge->origin_v].y*5;
-			int x1=vertices[temp.half_edge->end_v].x*5;
-			int y1=vertices[temp.half_edge->end_v].y*5;
+			int x0=(temp.half_edge->origin->x)*5;
+			int y0=(temp.half_edge->origin->y)*5;
+			int x1=(temp.half_edge->end->x)*5;
+			int y1=(temp.half_edge->end->y)*5;
+			cout<<x0<<" "<<y0<<" "<<x1<<" "<<y1<<"\n";
 			glBegin(GL_LINES);
 				glVertex2i(x0,y0);
 				glVertex2i(x1,y1);
