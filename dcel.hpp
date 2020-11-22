@@ -727,6 +727,7 @@ void DCEL(int nodes, int edges, vector<Point> &vertices, vector<pair<int,int>> &
     }
 
 
+
     fill_vertex_table(ver_tab , nodes , adj , h , vertices);
     cout <<"In dcel" << endl;
     fill_half_edge_table(half_edge_table , h , unvisited_half_edge , vertices , adj , face , face_table);
@@ -735,6 +736,37 @@ void DCEL(int nodes, int edges, vector<Point> &vertices, vector<pair<int,int>> &
     print_vertex_table(ver_tab , nodes);
     print_half_edge_table(half_edge_table , h);
     print_face_table(face_table);
+
+
+    
+
+    // isolate polygons 
+    for(int i=0;i<face_table.size();i++)
+    {
+        vector<Point> polygon;
+        class face_table temp=face_table[i];
+        if(temp.outer_component==NULL)
+            continue;
+        polygon.push_back(*(temp.outer_component->origin));
+        int indexOfBeginEgde = search_half_edge_table(temp.outer_component, half_edge_table);
+		cout<<indexOfBeginEgde<<" this si the eindex\n";
+        while(half_edge_table[indexOfBeginEgde].next!=temp.outer_component)
+        {
+            polygon.push_back(*(half_edge_table[indexOfBeginEgde].next->origin));
+			//cout<<" pushing  these are the points"<<half_edge_table[indexOfBeginEgde].next->origin_v<<" "<<half_edge_table[indexOfBeginEgde].next->end_v<<"\n";
+            indexOfBeginEgde++;
+        }
+        POLYGONS.push_back(polygon);
+    }
+    for(auto polygon: POLYGONS)
+    {
+        cout<<"new polygon \n";
+        for(auto p : polygon )
+        {
+            cout<<p.key<<" "<<p.x<<" "<<p.y<<" \n";
+        }
+    }
+    
 
     setArguments(half_edge_table, h, vertices, ver_tab, face_table);
 

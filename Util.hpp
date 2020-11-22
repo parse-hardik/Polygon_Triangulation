@@ -70,16 +70,14 @@ vector<half_edge> he;
 vector<Point> vertices;
 vector<vertex_table> vt;
 vector<face_table> ft;
+vector<pair<int,int> > diagonals;
 
-vector<pair<int,int>> diagonals;
-
-void setArguments(vector<half_edge_table> &het1 , vector<half_edge> &h, vector<Point> &vert,
- vector<vertex_table> &vertab, vector<face_table> & facetb){
+void setArguments(vector<half_edge_table> &het1 , vector<half_edge> &h, vector<Point> &vert, vector<vertex_table> &vertab, vector<face_table> &ftab){
 	het = het1;
 	he = h;
 	vertices = vert;
 	vt = vertab;
-	ft = facetb;
+	ft=ftab;
 }
 
 void display(void){  
@@ -99,8 +97,9 @@ void display(void){
 				glVertex2i(x1,y1);
 			glEnd();
 		}
-		for(auto diagonal:diagonals){
-			glColor3f(0, 0, 1); 
+		for(auto diagonal: diagonals)
+		{
+			glColor3f(0, 1, 0); 
 			int x0=vertices[diagonal.first].x*5;
 			int y0=vertices[diagonal.first].y*5;
 			int x1=vertices[diagonal.second].x*5;
