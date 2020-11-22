@@ -99,7 +99,7 @@ void display(void){
 		}
 		for(auto diagonal: diagonals)
 		{
-			glColor3f(1, 0, 0); 
+			glColor3f(0, 1, 0); 
 			int x0=vertices[diagonal.first].x*5;
 			int y0=vertices[diagonal.first].y*5;
 			int x1=vertices[diagonal.second].x*5;
