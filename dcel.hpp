@@ -691,46 +691,41 @@ void print_neighbouring_faces(float x, float y, vector<half_edge> & half_edge_ve
 }
 
 void DCEL(int nodes, int edges, vector<Point> &vertices, vector<pair<int,int>> &diagonals, int argc, char** argv){
-    vector<half_edge> h(2*edges);
+    int d = diagonals.size();
+    vector<half_edge> h(2*edges + 2*d);
     vector<vertex_table> ver_tab(nodes);
-    vector<half_edge_table> half_edge_table(2*edges);
+    vector<half_edge_table> half_edge_table(2*edges + 2*d);
     vector<vector <float> > adj(nodes);
-    vector<bool> unvisited_half_edge(2*edges);
+    vector<bool> unvisited_half_edge(2*edges+ 2*d);
     vector<face> face(nodes);
     vector<face_table> face_table(nodes);
+    vector<pair<int,int>> allEnD;
 
+    for(int i=0;i<edges;i++)
+        allEnD.push_back({i,(i+1)%nodes});
+    for(auto p: diagonals)
+        allEnD.push_back({p.first,p.second});
 
-    for(int i = 0 ; i < edges ; i++)
+    int i=0;
+    for(auto p: allEnD)
     {
-        adj[i].push_back((i+1)%nodes);
-        adj[(i+1)%nodes].push_back(i);
-        h[2*i].origin_v = i;
-        h[2*i].end_v = (i+1)%nodes;
-        h[2*i].origin = &vertices[i];
-        h[2*i].end = &vertices[(i+1)%nodes];
-        h[2*i + 1].origin_v = (i+1)%nodes;
-        h[2*i + 1].end_v = i;
-        h[2*i + 1].origin = &vertices[(i+1)%nodes];
-        h[2*i + 1].end = &vertices[i];
+        int x=p.first;
+        int y=p.second;
+        adj[x].push_back(y);
+        adj[y].push_back(x);
+        h[2*i].origin_v = x;
+        h[2*i].end_v = y;
+        h[2*i].origin = &vertices[x];
+        h[2*i].end = &vertices[y];
+        h[2*i + 1].origin_v = y;
+        h[2*i + 1].end_v = x;
+        h[2*i + 1].origin = &vertices[y];
+        h[2*i + 1].end = &vertices[x];
         h[2*i].twin = &h[2*i+1];
         h[2*i + 1].twin = &h[2*i];
+        i++;
     }
-    cout << "In dcel" << endl;
-    int d = diagonals.size();
-    /*for(int i = edges ; i<edges+d ; i++){
-        adj[diagonals[i-edges].first].push_back(diagonals[i-edges].second);
-        adj[diagonals[i-edges].second].push_back(diagonals[i-edges].first);
-        h[2*i].origin_v = diagonals[i-edges].first;
-        h[2*i].end_v = diagonals[i-edges].second;
-        h[2*i].origin = &vertices[diagonals[i-edges].first];
-        h[2*i].end = &vertices[diagonals[i-edges].second];
-        h[2*i + 1].origin_v = diagonals[i-edges].second;
-        h[2*i + 1].end_v = diagonals[i-edges].first;
-        h[2*i + 1].origin = &vertices[diagonals[i-edges].second];
-        h[2*i + 1].end = &vertices[diagonals[i-edges].first];
-        h[2*i].twin = &h[2*i+1];
-        h[2*i + 1].twin = &h[2*i];
-    }*/
+
 
     fill_vertex_table(ver_tab , nodes , adj , h , vertices);
     fill_half_edge_table(half_edge_table , h , unvisited_half_edge , vertices , adj , face , face_table);
@@ -739,6 +734,7 @@ void DCEL(int nodes, int edges, vector<Point> &vertices, vector<pair<int,int>> &
     print_vertex_table(ver_tab , nodes);
     print_half_edge_table(half_edge_table , h);
     print_face_table(face_table);
+
 
     setArguments(half_edge_table, h, vertices, ver_tab);
 
@@ -750,16 +746,5 @@ void DCEL(int nodes, int edges, vector<Point> &vertices, vector<pair<int,int>> &
     init2D(0.0,0.0,0.0);
     glutDisplayFunc(display);
     glutMainLoop();
-    
-
-
-    // cout<<"Enter the thresh hold area: ";
-    // float threshold_area;
-    // cin>>threshold_area;
-    // print_faces_with_area_lessthan_threshhold(threshold_area, face_table,half_edge_table, vertex);
-
-    // cout<<"Enter the name of Half Edge: ";
-    // cin >>x>>y;
-    // print_neighbouring_faces(x,y,h,half_edge_table,face_table);
-    // return 0;
+    return;
 }
