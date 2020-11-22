@@ -690,7 +690,7 @@ void print_neighbouring_faces(float x, float y, vector<half_edge> & half_edge_ve
     }
 }
 
-void DCEL(int nodes, int edges, vector<Point> &vertices, vector<pair<int,int>> &diagonals, int argc, char** argv, bool show){
+void DCEL(int nodes, int edges, vector<Point> &vertices, vector<pair<int,int>> &diagonals){
     int d = diagonals.size();
     vector<half_edge> h(2*edges + 2*d);
     vector<vertex_table> ver_tab(nodes);
@@ -728,6 +728,7 @@ void DCEL(int nodes, int edges, vector<Point> &vertices, vector<pair<int,int>> &
 
 
     fill_vertex_table(ver_tab , nodes , adj , h , vertices);
+    cout <<"In dcel" << endl;
     fill_half_edge_table(half_edge_table , h , unvisited_half_edge , vertices , adj , face , face_table);
     fill_face_table_inner_components(face_table, h , half_edge_table , face , vertices);
     //print_half_edge(h , vertex , 2*edges);
@@ -735,34 +736,7 @@ void DCEL(int nodes, int edges, vector<Point> &vertices, vector<pair<int,int>> &
     print_half_edge_table(half_edge_table , h);
     print_face_table(face_table);
 
-    
-
-    // isolate polygons 
-    for(int i=0;i<face_table.size();i++)
-    {
-        vector<Point> polygon;
-        class face_table temp=face_table[i];
-        if(temp.outer_component==NULL)
-            continue;
-        polygon.push_back(*(temp.outer_component->origin));
-        int indexOfBeginEgde = search_half_edge_table(temp.outer_component, half_edge_table);
-        while(half_edge_table[indexOfBeginEgde].next!=temp.outer_component)
-        {
-            polygon.push_back(*(half_edge_table[indexOfBeginEgde].next->origin));
-            indexOfBeginEgde++;
-        }
-        POLYGONS.push_back(polygon);
-    }
-    for(auto polygon: POLYGONS)
-    {
-        cout<<"new polygon \n";
-        for(auto p : polygon )
-        {
-            cout<<p.key<<" "<<p.x<<" "<<p.y<<" \n";
-        }
-    }
-
-    setArguments(half_edge_table, h, vertices, ver_tab);
+    setArguments(half_edge_table, h, vertices, ver_tab, face_table);
 
    
     return;

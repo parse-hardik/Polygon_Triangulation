@@ -8,7 +8,6 @@
 
 using namespace std;
 
-vector<pair<int,int>> diagonals;
 
 
 
@@ -328,23 +327,48 @@ int main(int argc, char** argv) {
 		cout << diagonals[i].first << " " << diagonals[i].second << endl;
 	}
 
-	DCEL(n, n, vertices, diagonals, argc, argv, false);
+	DCEL(n, n, vertices, diagonals);
+
+	// isolate polygons 
+    for(int i=0;i<ft.size();i++)
+    {
+        vector<Point> polygon;
+        class face_table temp=ft[i];
+        if(temp.outer_component==NULL)
+            continue;
+        polygon.push_back(*(temp.outer_component->origin));
+        int indexOfBeginEgde = search_half_edge_table(temp.outer_component, het);
+        while(het[indexOfBeginEgde].next!=temp.outer_component)
+        {
+            polygon.push_back(*(het[indexOfBeginEgde].next->origin));
+            indexOfBeginEgde++;
+        }
+        POLYGONS.push_back(polygon);
+    }
+    for(auto polygon: POLYGONS)
+    {
+        cout<<"new polygon \n";
+        for(auto p : polygon )
+        {
+            cout<<p.key<<" "<<p.x<<" "<<p.y<<" \n";
+        }
+    }
 	
 	for(auto polygon: POLYGONS)
 	{
 		cout<<"triangulating a polygon\n";
 		triangulatePolygon(polygon);
 	}
-	DCEL(n, n, vertices, diagonals, argc, argv,true);
+	// DCEL(n, n, vertices, diagonals);
 
-	// glutInit(&argc,argv);
-    // glutInitDisplayMode (GLUT_SINGLE | GLUT_RGB);
-    // glutInitWindowSize (700, 700);
-    // glutInitWindowPosition (100, 0);
-    // glutCreateWindow ("Initial Polygon");
-    // init2D(0.0,0.0,0.0);
-    // glutDisplayFunc(display);
-    // glutMainLoop();
+	glutInit(&argc,argv);
+    glutInitDisplayMode (GLUT_SINGLE | GLUT_RGB);
+    glutInitWindowSize (700, 700);
+    glutInitWindowPosition (100, 0);
+    glutCreateWindow ("Initial Polygon");
+    init2D(0.0,0.0,0.0);
+    glutDisplayFunc(display);
+    glutMainLoop();
 }
 
 /*
