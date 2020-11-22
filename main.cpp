@@ -328,6 +328,8 @@ int main(int argc, char** argv) {
 		cout << diagonals[i].first << " " << diagonals[i].second << endl;
 	}
 
+	partitions = diagonals.size();
+
 	DCEL(n, n, vertices, diagonals);
 	
 

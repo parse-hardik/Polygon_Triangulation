@@ -72,6 +72,8 @@ vector<vertex_table> vt;
 vector<face_table> ft;
 vector<pair<int,int> > diagonals;
 
+int partitions;
+
 void setArguments(vector<half_edge_table> &het1 , vector<half_edge> &h, 
 vector<Point> &vert, vector<vertex_table> &vertab, vector<face_table> &ftab){
 	het = het1;
@@ -85,31 +87,32 @@ void display(void){
 	cout<<"in displplay\n";
 	glClear(GL_COLOR_BUFFER_BIT);
 	glPointSize(3);
-		int l = het.size();
-		cout<<l<<" this is l\n";
-		class half_edge_table temp;
-		for(int i=0;i<l;i++){
-			cout<<"in loop  "<<i<<" \n";
-			temp=het[i];
-			//cout<<vertices[temp.half_edge->origin].x*5<<" is vertex\n";
-			glColor3f(1, 0, 0); 
-			int x0=(temp.half_edge->origin->x)*5;
-			int y0=(temp.half_edge->origin->y)*5;
-			int x1=(temp.half_edge->end->x)*5;
-			int y1=(temp.half_edge->end->y)*5;
-			cout<<x0<<" "<<y0<<" "<<x1<<" "<<y1<<"\n";
+	int n = vertices.size();
+		
+		int count=0;
+		for(auto diagonal: diagonals)
+		{
+			if(count<partitions)
+				glColor3f(0, 1, 0); 
+			else
+				glColor3f(0, 0, 1); 
+			int x0=vertices[diagonal.first].x*2;
+			int y0=vertices[diagonal.first].y*2;
+			int x1=vertices[diagonal.second].x*2;
+			int y1=vertices[diagonal.second].y*2;
 			glBegin(GL_LINES);
 				glVertex2i(x0,y0);
 				glVertex2i(x1,y1);
 			glEnd();
+			count++;
 		}
-		for(auto diagonal: diagonals)
-		{
-			glColor3f(0, 1, 0); 
-			int x0=vertices[diagonal.first].x*5;
-			int y0=vertices[diagonal.first].y*5;
-			int x1=vertices[diagonal.second].x*5;
-			int y1=vertices[diagonal.second].y*5;
+
+		for(int i=0;i<vertices.size();i++){
+			glColor3f(1, 0, 0); 
+			int x0=vertices[i].x*2;
+			int y0=vertices[i].y*2;
+			int x1=vertices[(i+1)%n].x*2;
+			int y1=vertices[(i+1)%n].y*2;
 			glBegin(GL_LINES);
 				glVertex2i(x0,y0);
 				glVertex2i(x1,y1);
