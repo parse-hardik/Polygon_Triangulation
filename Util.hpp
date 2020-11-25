@@ -97,10 +97,10 @@ void display(void){
 				glColor3f(0, 1, 0); 
 			else
 				glColor3f(0, 0, 1); 
-			int x0=vertices[diagonal.first].x*2;
-			int y0=vertices[diagonal.first].y*2;
-			int x1=vertices[diagonal.second].x*2;
-			int y1=vertices[diagonal.second].y*2;
+			int x0=vertices[diagonal.first].x*5;
+			int y0=vertices[diagonal.first].y*5;
+			int x1=vertices[diagonal.second].x*5;
+			int y1=vertices[diagonal.second].y*5;
 			glBegin(GL_LINES);
 				glVertex2i(x0,y0);
 				glVertex2i(x1,y1);
@@ -110,10 +110,10 @@ void display(void){
 
 		for(int i=0;i<vertices.size();i++){
 			glColor3f(1, 0, 0); 
-			int x0=vertices[i].x*2;
-			int y0=vertices[i].y*2;
-			int x1=vertices[(i+1)%n].x*2;
-			int y1=vertices[(i+1)%n].y*2;
+			int x0=vertices[i].x*5;
+			int y0=vertices[i].y*5;
+			int x1=vertices[(i+1)%n].x*5;
+			int y1=vertices[(i+1)%n].y*5;
 			glBegin(GL_LINES);
 				glVertex2i(x0,y0);
 				glVertex2i(x1,y1);
