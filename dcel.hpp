@@ -4,29 +4,28 @@
 
 using namespace std;
 vector<vector<Point>> POLYGONS;
+
+//A utility function to Compare 2 points
 class ComparePoint { 
 	public:
     bool operator()(pair<Point,int> const& p1, pair<Point,int> const& p2) { 
-        // if(p1.first.y > p2.first.y)
-        //     return true;
-        // else if(p1.first.y==p2.first.y)
-        //     return p1.first.x < p2.first.x; 
         return (p1.first.y < p2.first.y) || (p1.first.y==p2.first.y && p1.first.x>p2.first.x);
     } 
 }; 
 
+//Checks if the following 3 points make a clockwise turn or not
+//Accepts input in the following format
+//p1->next Point
+//p2->prev Point
+//p3->curr Point
 bool IsConvex(const Point& p1, const Point& p2, const Point& p3) {
     int tmp = (p3.y-p2.y)*(p2.x-p1.x) - (p2.y-p1.y)*(p3.x-p2.x);
-    // cout << "InConvex" << endl;
-    // cout << p1.x << " " << p1.y<< endl;
-    // cout << p2.x << " " << p2.y<< endl;
-    // cout << p3.x << " " << p3.y<< endl;
-    // cout << "tmp is " << tmp << endl;
-    // cout << "OutConvex" << endl;
 	if(tmp>0) return 1; 	//counter-clockwise
 	return 0;               //clockwise
 }
 
+//This structure helps in construction of the Status and helper Data Structures.
+//Compares the edges based on their y and then x coordinates
 struct EdgeCompare
 {
     bool operator() (const Edge& e1, const Edge& other) const{
@@ -70,6 +69,7 @@ bool Edge::operator < (const Edge & other) const {
 	}
 }
 
+//A utility function to check the type of the given vertex
 int VertexType(vector<Point> &vertices, int i){
     int n=vertices.size();
     if(vertices[(i+n-1)%n].y < vertices[i].y && vertices[(i+1)%n].y < vertices[i].y){
@@ -565,47 +565,6 @@ int search_face_table(int key, vector<face_table>& face_table)
     return -1;
 }
 
-void print_faces_with_area_lessthan_threshhold(float threshhold_area, vector<face_table> & face_table, vector<class half_edge_table> half_edge_table
-, vector<class Point> vertex)
-{
-    class face_table temp = face_table[0];
-    int i = 0;
-    //cout<<"*****Area of faces******"<<endl;
-    while (1)
-    {   
-        if (temp.face==NULL)
-            break;
-
-        vector<class half_edge*> inner_edges = temp.inner_components;
-        float area = temp.area;
-        for (int i=0; i<inner_edges.size();i++)
-            {
-                int index = search_half_edge_table(inner_edges[i],half_edge_table);
-                class half_edge *temp2 = half_edge_table[index].half_edge, *head;
-                head = temp2;
-                vector<int> key;
-
-                while(1)
-                {
-                    key.push_back(temp2->origin_v);
-                    temp2 = half_edge_table[index].next;
-                    
-                    if(head == temp2) break;
-                    index++;
-                }
-                    area -= area_poly(key,vertex);
-            }
-
-        
-        //cout<<"F "<<temp.face->key<<" "<<area<<endl;
-
-         if (area < threshhold_area && area > 0)
-             cout<<"F"<<temp.face->key<<", less than threshhold.\n";
-        i++;
-        temp = face_table[i];
-    }
-}
-
 void print_neighbouring_faces(float x, float y, vector<half_edge> & half_edge_vector, vector<half_edge_table> &half_edge_table, vector<face_table> &face_table)
 {   
     class half_edge *half_edge, *head, *temp;
@@ -729,7 +688,7 @@ void DCEL(int nodes, int edges, vector<Point> &vertices, vector<pair<int,int>> &
 
 
     fill_vertex_table(ver_tab , nodes , adj , h , vertices);
-    cout <<"In dcel" << endl;
+    // cout <<"In dcel" << endl;
     fill_half_edge_table(half_edge_table , h , unvisited_half_edge , vertices , adj , face , face_table);
     fill_face_table_inner_components(face_table, h , half_edge_table , face , vertices);
     //print_half_edge(h , vertex , 2*edges);
@@ -749,7 +708,7 @@ void DCEL(int nodes, int edges, vector<Point> &vertices, vector<pair<int,int>> &
             continue;
         polygon.push_back(*(temp.outer_component->origin));
         int indexOfBeginEgde = search_half_edge_table(temp.outer_component, half_edge_table);
-		cout<<indexOfBeginEgde<<" this si the eindex\n";
+		// cout<<indexOfBeginEgde<<" this si the eindex\n";
         while(half_edge_table[indexOfBeginEgde].next!=temp.outer_component)
         {
             polygon.push_back(*(half_edge_table[indexOfBeginEgde].next->origin));
@@ -767,9 +726,7 @@ void DCEL(int nodes, int edges, vector<Point> &vertices, vector<pair<int,int>> &
         }
     }
     
-
     setArguments(half_edge_table, h, vertices, ver_tab, face_table);
-
    
     return;
 }

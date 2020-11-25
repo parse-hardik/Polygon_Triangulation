@@ -3,26 +3,20 @@
 #include <queue>
 #include <set>
 #include <map>
+#include <ctime>
 
 #include "dcel.hpp"
 
 using namespace std;
 
-
-
-
-
-int findIter(set<Edge>::iterator &it, vector<set<Edge>::iterator> &helper){
-	for(int i=0;i<helper.size();i++){
-		if(helper[i]==it)
-			return i;
-	}
-	return -1;
-}
+//Compares two points based on their y-coordinates
 bool ComparePoint_t(Point p, Point q) 
 { 
 	return (p.y > q.y) || (p.y==q.y && p.x < q.x); 
 }
+
+//Checks if the 2 points are on opposite chains or not
+//Used in the triangulate code
 bool AreOnOppSide(Point p,Point q, map<int,int> &left,map<int,int> &right)
 {
 	if((left[p.key]==1 && right[q.key]==1) || (left[q.key]==1 && right[p.key]==1) )
@@ -30,18 +24,8 @@ bool AreOnOppSide(Point p,Point q, map<int,int> &left,map<int,int> &right)
 	else
 		return false;
 }
-// int DiagonalIsInside(Point p1,Point p2,Point p3)
-// {
-// 	int val = (p2.y - p1.y) * (p3.x - p2.x) - 
-//               (p2.x - p1.x) * (p3.y - p2.y); 
-// 	cout<<"val of the orientation"<<val<<"\n";
-  
-//     if (val == 0) return 0;  // colinear 
-// 	if(val > 0) return 1;// clock
-// 	if(val<0 )return 2;// counter clock eise 
-// }
 
-
+//Takes all the vertices sorted according to y and then x coordinate
 void triangulatePolygon(vector<Point> vertices_ccw_t)
 {
 	map<int,int> GLOBAL_INDEX;
@@ -69,9 +53,9 @@ void triangulatePolygon(vector<Point> vertices_ccw_t)
 		}		
 	}
     sort(vertices_sorted_toy_t.begin(), vertices_sorted_toy_t.end(), ComparePoint_t);
-	cout<<"order of vertices is\n";
-	for(auto p: vertices_sorted_toy_t )
-		cout<<p.key<<" "<<p.x<<" "<<p.y<<"\n";
+	// cout<<"order of vertices is\n";
+	// for(auto p: vertices_sorted_toy_t )
+	// 	cout<<p.key<<" "<<p.x<<" "<<p.y<<"\n";
 	
 	stack<Point> st_t;
 	st_t.push(vertices_sorted_toy_t[0]);
@@ -80,8 +64,8 @@ void triangulatePolygon(vector<Point> vertices_ccw_t)
 	{
 		if(AreOnOppSide(vertices_sorted_toy_t[j],st_t.top(),left,right))
 		{
-			cout<<"they are on opp side "<<st_t.top().key<<" "<<vertices_sorted_toy_t[j].key<<"\n";
-			while(st_t.size()>1)//ppop and make diagonals except the last one
+			// cout<<"they are on opp side "<<st_t.top().key<<" "<<vertices_sorted_toy_t[j].key<<"\n";
+			while(st_t.size()>1)//pop and make diagonals except the last one
 			{
 				Point temp_t = st_t.top();
 				st_t.pop();
@@ -93,7 +77,6 @@ void triangulatePolygon(vector<Point> vertices_ccw_t)
 		}
 		else// same side
 		{
-			// cout<<"they are on same side "<<st_t.top().key<<" "<<vertices_sorted_toy_t[j].key<<"\n";
 			Point middle_temp_t=st_t.top();
 			st_t.pop();
 			bool isonleft;// variable to hold which side it is on
@@ -105,7 +88,7 @@ void triangulatePolygon(vector<Point> vertices_ccw_t)
 			{
 				Point above_temp_t =st_t.top();
 				int val=IsConvex(above_temp_t,middle_temp_t,vertices_sorted_toy_t[j]);
-				cout<<val<<" this is is convex result";
+				// cout<<val<<" this is is convex result";
 				if(isonleft)//if point on left chain
 				{
 					if(val==1)//cross product is negative
@@ -181,23 +164,13 @@ int main(int argc, char** argv) {
 	// vector<set<Edge>::iterator> helper;
 	map<Edge, int, EdgeCompare> helper;
 
+	auto current_time = std::chrono::system_clock::now();
+
 	while(!pq.empty()){
 		pair<Point,int> p=pq.top();
 		pq.pop();
 		int type = VertexType(vertices, p.second);
 		bool err=false;
-		int ex = p.first.x, ey = p.first.y;
-		cout << ex << " ";
-		cout << ey << endl;
-		cout << "Type is  " << type << endl;
-		cout << "Status before is " << endl;
-		for(auto it=Status.begin();it!=Status.end();it++){
-			Edge newEdge;
-			newEdge.p1 = it->p1;
-			newEdge.p2 = it->p2;
-			int index = helper[newEdge];
-			cout << "(" << it->p1.x << "," << it->p1.y  << ") " << "(" << it->p2.x << "," << it->p2.y << ") -> " << index<< endl;
-		}
 		switch(type){
 			//Insert ei in T and set helper(ei) to vi.
 			case 1:{ 					// Start Vertex
@@ -222,7 +195,7 @@ int main(int argc, char** argv) {
 				Edge newEdge;
 				newEdge.p1 =p.first;
 				newEdge.p2 = p.first;
-				auto i = Status.lower_bound(newEdge);
+				auto i = Status.lower_bound(newEdge); //If helper(ej) = merge vertex, then add diagonal
 				if(i!=Status.begin())
 					i--;
 				else{
@@ -230,12 +203,9 @@ int main(int argc, char** argv) {
 					err=true;
 					break;
 				}
-//				cout << "In Split \n" << i->first.p1.x << "," << i->first.p1.y << " to ";
-//				cout << i->first.p2.x << "," << i->first.p2.y << endl;
 				newEdge.p1 = i->p1;
 				newEdge.p2 = i->p2;
 				int index = helper[newEdge];
-				// cout << "Diagonal is " << index << "to " << p.second << endl;
 				diagonals.push_back(make_pair(index,p.second));
 				helper[newEdge] = p.second;
 				newEdge.p1 = p.first;
@@ -310,41 +280,38 @@ int main(int argc, char** argv) {
 				break;
 				}
 		}
-		cout << "Status after is " << endl;
-		for(auto it=Status.begin();it!=Status.end();it++){
-			Edge newEdge;
-			newEdge.p1 = it->p1;
-			newEdge.p2 = it->p2;
-			int index = helper[newEdge];
-			cout << "(" << it->p1.x << "," << it->p1.y  << ") " << "(" << it->p2.x << "," << it->p2.y << ") -> " << index<< endl;
-		}
 		if(err){
 			cout << "In error" << endl;
 			break;
 		}
 	}
-	cout << "size is " << diagonals.size() << endl;
-	for(int i=0;i<diagonals.size();i++){
-		cout << diagonals[i].first << " " << diagonals[i].second << endl;
-	}
-
+	auto end_time = std::chrono::system_clock::now();
+	auto milli_secs = std::chrono::duration<double, std::milli>(end_time - current_time).count() * .001;
+	cout << "Time taken for making the polygon y-monotone is " << milli_secs << " milli seconds." << endl;
 	partitions = diagonals.size();
 
+	current_time = std::chrono::system_clock::now();
+	//Inserts all the diagonals that are to be inserted into the data structure D
 	DCEL(n, n, vertices, diagonals);
-	
+	end_time = std::chrono::system_clock::now();
+	milli_secs = std::chrono::duration<double, std::milli>(end_time - current_time).count() * .001;
+	cout << "Time taken for intialising DCEL\n and inserting diagonals is " << milli_secs << " milli seconds." << endl;
 
-	
+	current_time = std::chrono::system_clock::now();
+	//For all y-monotone polygons, triangulate each one of them
 	for(auto polygon: POLYGONS)
 	{
 		cout<<"triangulating a polygon\n";
 		triangulatePolygon(polygon);
 	}
-	//DCEL(n, n, vertices, diagonals);
+	end_time = std::chrono::system_clock::now();
+	milli_secs = std::chrono::duration<double, std::milli>(end_time - current_time).count() * .001;
+	cout << "Time taken for triangulating each y-monotone polygon is " << milli_secs << " milli seconds." << endl;
 
-
+	//Plot the polygon and all the triangulated regions
 	glutInit(&argc,argv);
     glutInitDisplayMode (GLUT_SINGLE | GLUT_RGB);
-    glutInitWindowSize (700, 700);
+    glutInitWindowSize (900, 900);
     glutInitWindowPosition (100, 0);
     glutCreateWindow ("Initial Polygon");
     init2D(0.0,0.0,0.0);
@@ -431,3 +398,22 @@ int main(int argc, char** argv) {
 
 //I shared a Jam file with the meeting: https://jamboard.google.com/d/1O7rzjazuwVcAMXXrsSKwbA6BqUz1kdSg_W-_uwnSGk0/edit?usp=meet_whiteboard
 
+/*
+15
+
+21 79
+23 47
+21 34
+15 28
+20 20
+25 13
+28 24
+31 19
+36 34
+42 26
+44 76
+36 61
+33 47
+27 73
+30 44
+*/

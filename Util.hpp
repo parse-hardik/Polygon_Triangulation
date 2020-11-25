@@ -74,6 +74,7 @@ vector<pair<int,int> > diagonals;
 
 int partitions;
 
+//For plotting all the edges and diagonals, we need to have all the data structres stored globally
 void setArguments(vector<half_edge_table> &het1 , vector<half_edge> &h, 
 vector<Point> &vert, vector<vertex_table> &vertab, vector<face_table> &ftab){
 	het = het1;
@@ -84,7 +85,7 @@ vector<Point> &vert, vector<vertex_table> &vertab, vector<face_table> &ftab){
 }
 
 void display(void){  
-	cout<<"in displplay\n";
+	// cout<<"in displplay\n";
 	glClear(GL_COLOR_BUFFER_BIT);
 	glPointSize(3);
 	int n = vertices.size();
